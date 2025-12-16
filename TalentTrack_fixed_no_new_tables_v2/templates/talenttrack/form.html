@@ -1,0 +1,52 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12 col-lg-10">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6>{{ title }}</h6>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger text-sm">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row">
+              {% for field in form %}
+                <div class="col-md-6">
+                  <div class="form-group mb-3">
+                    <label class="form-control-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                      <div class="text-xs text-secondary">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for err in field.errors %}
+                      <div class="text-danger text-xs">{{ err }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary mb-0">Guardar</button>
+              <a class="btn btn-outline-secondary mb-0" href="javascript:history.back()">Cancelar</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // aplica clases bootstrap a inputs/selects generados
+  document.querySelectorAll("input, select, textarea").forEach(el => {
+    if (!el.classList.contains("form-control") && el.type !== "checkbox") el.classList.add("form-control");
+    if (el.type === "checkbox") el.classList.add("form-check-input");
+  });
+</script>
+{% endblock content %}

@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12">
+
+      <div class="card mb-4">
+        <div class="card-header pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <h6 class="mb-0">Turnos</h6>
+            {% if readonly %}
+              <p class="text-sm text-secondary mb-0">Solo lectura</p>
+            {% endif %}
+          </div>
+
+          {% if can_create %}
+            <a class="btn btn-primary btn-sm" href="{% url 'tt_turno_create' %}">Nuevo</a>
+          {% endif %}
+        </div>
+
+        <div class="card-body pt-3">
+
+          <form method="get" class="row g-2 align-items-end mb-3">
+            {% if is_superadmin %}
+              <div class="col-12 col-md-6">
+                <label class="form-label text-sm mb-1">Empresa</label>
+                <select name="empresa" class="form-control">
+                  <option value="">Todas</option>
+                  {% for e in empresa_options %}
+                    <option value="{{ e.id }}" {% if empresa_filter == e.id|stringformat:"s" %}selected{% endif %}>{{ e }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+            <div class="col-12 col-md-2 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary w-100" type="submit">Filtrar</button>
+              <a class="btn btn-sm btn-outline-secondary w-100" href="{% url 'tt_turno_list' %}">Limpiar</a>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Inicio</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fin</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Días</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in turnos %}
+                <tr>
+                  <td class="text-sm">{{ t.empresa }}</td>
+                  <td class="text-sm">{{ t.nombre }}</td>
+                  <td class="text-sm">{{ t.hora_inicio|default:"" }}</td>
+                  <td class="text-sm">{{ t.hora_fin|default:"" }}</td>
+                  <td class="text-sm text-secondary">{{ t.dias_semana|default:"" }}</td>
+                  <td class="text-sm">
+                    {% if can_create %}
+                      <a class="btn btn-link text-dark text-sm p-0" href="{% url 'tt_turno_update' t.id %}">Editar</a>
+                      <span class="text-secondary mx-1">|</span>
+                      <a class="btn btn-link text-danger text-sm p-0" href="{% url 'tt_turno_delete' t.id %}">Eliminar</a>
+                    {% else %}
+                      <span class="text-secondary">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-secondary py-4">No hay turnos.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12 col-lg-8">
+
+      <div class="card">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0">{{ empleado }}</h6>
+            <p class="text-sm text-secondary mb-0">{{ empleado.empresa }}</p>
+          </div>
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'tt_empleado_list' %}">Volver</a>
+        </div>
+
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <p class="text-sm mb-1"><b>Documento:</b> {{ empleado.documento|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Email:</b> {{ empleado.email|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Teléfono:</b> {{ empleado.telefono|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Dirección:</b> {{ empleado.direccion|default:"—" }}</p>
+            </div>
+            <div class="col-12 col-md-6">
+              <p class="text-sm mb-1"><b>Unidad:</b> {{ empleado.unidad|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Puesto:</b> {{ empleado.puesto|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Jefe:</b> {{ empleado.manager|default:"—" }}</p>
+              <p class="text-sm mb-1"><b>Ingreso:</b> {{ empleado.fecha_ingreso|default:"—" }}</p>
+            </div>
+          </div>
+
+          {% if empleado.foto_url %}
+          <div class="mt-3">
+            <img src="{{ empleado.foto_url }}" class="img-fluid border-radius-lg" alt="Foto empleado" style="max-height: 280px;">
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

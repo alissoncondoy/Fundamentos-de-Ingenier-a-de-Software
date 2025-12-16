@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TalentTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Soft UI CSS -->
+  <link href="{% static 'assets/css/soft-ui-dashboard.css' %}" rel="stylesheet" />
+  <link href="{% static 'assets/css/nucleo-icons.css' %}" rel="stylesheet" />
+  <link href="{% static 'assets/css/nucleo-svg.css' %}" rel="stylesheet" />
+
+</head>
+
+<body class="bg-gray-100">
+
+  {% block content %}{% endblock %}
+
+  <!-- Core JS -->
+  <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
+</body>
+</html>

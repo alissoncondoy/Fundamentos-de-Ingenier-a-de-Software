@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <h6>Usuarios (Tabla seguridad.usuario)</h6>
+          <a class="btn btn-sm btn-primary" href="{% url 'tt_usuario_create' %}">Nuevo</a>
+        </div>
+        <div class="card-body px-0 pt-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th><th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th><th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Teléfono</th><th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">MFA</th><th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Activo</th><th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Último acceso</th>
+                  <th class="text-secondary opacity-7"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for o in usuarios %}
+                <tr>
+                  <td class="align-middle text-sm"><span class="text-xs">{{ o.empresa|default:'-' }}</span></td><td class="align-middle text-sm"><span class="text-xs">{{ o.email }}</span></td><td class="align-middle text-sm"><span class="text-xs">{{ o.phone|default:'-' }}</span></td><td class="align-middle text-sm"><span class="text-xs">{{ o.mfa_habilitado|default:'-' }}</span></td><td class="align-middle text-sm"><span class="text-xs">{{ o.activo|default:'-' }}</span></td><td class="align-middle text-sm"><span class="text-xs">{{ o.ultimo_acceso|default:'-' }}</span></td>
+                  <td class="align-middle text-end">
+                    <a class="btn btn-link text-dark px-2 mb-0" href="{% url 'tt_usuario_update' o.id %}">Editar</a>
+       <a class="btn btn-link text-danger px-2 mb-0" href="{% url 'tt_usuario_delete' o.id %}">Eliminar</a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="p-4 text-sm text-secondary">Sin registros.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% if is_paginated %}
+      <div class="d-flex justify-content-end">
+        <nav>
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={ page_obj.previous_page_number }">«</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{ page_obj.number }</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={ page_obj.next_page_number }">»</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

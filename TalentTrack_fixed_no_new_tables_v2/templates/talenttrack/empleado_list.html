@@ -1,0 +1,105 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12">
+
+      <div class="card mb-4">
+        <div class="card-header pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <h6 class="mb-0">Empleados</h6>
+            <p class="text-sm text-secondary mb-0">Listado (según tu rol)</p>
+          </div>
+
+          <div class="d-flex gap-2">
+            {% if can_export %}
+              <a class="btn btn-outline-primary btn-sm"
+                 href="{% url 'tt_export_empleados_csv' %}?{{ request.GET.urlencode }}">
+                Export CSV
+              </a>
+            {% endif %}
+            {% if can_create %}
+              <a class="btn btn-primary btn-sm" href="{% url 'tt_empleado_create' %}">Nuevo</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-body pt-3">
+
+          <form method="get" class="row g-2 align-items-end mb-3">
+            {% if is_superadmin %}
+              <div class="col-12 col-md-4">
+                <label class="form-label text-sm mb-1">Empresa</label>
+                <select name="empresa" class="form-control">
+                  <option value="">Todas</option>
+                  {% for e in empresa_options %}
+                    <option value="{{ e.id }}" {% if empresa_filter == e.id|stringformat:"s" %}selected{% endif %}>{{ e }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+            <div class="col-6 col-md-3">
+              <label class="form-label text-sm mb-1">Desde (creación)</label>
+              <input type="date" name="desde" value="{{ desde }}" class="form-control">
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label text-sm mb-1">Hasta (creación)</label>
+              <input type="date" name="hasta" value="{{ hasta }}" class="form-control">
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary w-100" type="submit">Filtrar</button>
+              <a class="btn btn-sm btn-outline-secondary w-100" href="{% url 'tt_empleado_list' %}">Limpiar</a>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Documento</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Unidad</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Puesto</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for e in empleados %}
+                <tr>
+                  <td class="text-sm">{{ e.empresa }}</td>
+                  <td class="text-sm">
+                    <a href="{% url 'tt_empleado_detail' e.id %}">{{ e }}</a>
+                    <div class="text-xs text-secondary">{{ e.email|default:"" }}</div>
+                  </td>
+                  <td class="text-sm">{{ e.documento|default:"" }}</td>
+                  <td class="text-sm">{{ e.unidad|default:"" }}</td>
+                  <td class="text-sm">{{ e.puesto|default:"" }}</td>
+                  <td class="text-sm">
+                    {% if can_create %}
+                      <a class="btn btn-link text-dark text-sm p-0" href="{% url 'tt_empleado_update' e.id %}">Editar</a>
+                      <span class="text-secondary mx-1">|</span>
+                      <a class="btn btn-link text-danger text-sm p-0" href="{% url 'tt_empleado_delete' e.id %}">Eliminar</a>
+                    {% else %}
+                      <span class="text-secondary">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center text-secondary py-4">No hay empleados para los filtros seleccionados.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
