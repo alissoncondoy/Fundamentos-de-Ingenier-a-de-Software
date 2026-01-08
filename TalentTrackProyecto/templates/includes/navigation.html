@@ -1,0 +1,44 @@
+{% load static %}
+{% load replace_value %}
+
+<nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur">
+  <div class="container-fluid py-1 px-3">
+
+    <!-- Título de la sección -->
+    <div class="d-flex align-items-center">
+      <h6 class="font-weight-bolder mb-0">
+        {{ segment|replace_value:"_" }}
+      </h6>
+    </div>
+
+    <!-- Usuario -->
+    <ul class="navbar-nav ms-auto">
+      {% if request.user.is_authenticated %}
+        <li class="nav-item d-flex align-items-center me-2">
+          <a href="javascript:;" id="iconNavbarSidenav" class="tt-topbar-toggler nav-link text-body p-0" aria-label="Abrir/cerrar menú">
+            <span class="sidenav-toggler-inner">
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+              <i class="sidenav-toggler-line"></i>
+            </span>
+          </a>
+        </li>
+        <li class="nav-item d-flex align-items-center">
+          <span class="nav-link text-body font-weight-bold px-3">
+            {{ request.user.display_name }}
+          </span>
+        </li>
+        <form method="post" action="{% url 'tt_logout' %}" class="nav-item d-flex align-items-center m-0 p-0">
+          {% csrf_token %}
+          <button type="submit"
+            class="nav-link text-body font-weight-bold px-0 bg-transparent border-0">
+            <i class="fas fa-sign-out-alt me-1"></i>
+            Salir
+          </button>
+        </form>
+
+      {% endif %}
+    </ul>
+
+  </div>
+</nav>
