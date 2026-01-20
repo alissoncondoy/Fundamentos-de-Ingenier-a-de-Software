@@ -1,0 +1,259 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+          <h4 class="mb-0">Panel SUPERADMIN</h4>
+          <p class="text-sm text-secondary mb-0">{{ scope.label }} · Últimos {{ scope.days }} días · Hoy {{ scope.today }}</p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <form method="get" class="d-flex flex-wrap gap-2 align-items-center">
+            <input type="hidden" name="days" value="{{ scope.days|default:14 }}">
+            <select name="empresa" class="form-control" style="min-width: 260px;">
+              <option value="">Todas las empresas</option>
+              {% for e in scope.empresas %}
+                <option value="{{ e.id }}" {% if scope.empresa_id == e.id %}selected{% endif %}>{{ e.nombre }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-outline-secondary btn-sm" type="submit">Aplicar</button>
+          </form>
+
+          <a class="btn btn-primary btn-sm" href="{% url 'tt_empleado_usuario_alta' %}">Alta empleado + usuario</a>
+          <button class="btn btn-outline-primary btn-sm" id="tt-refresh">Actualizar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tt-dash"
+       data-endpoint="{% url 'tt_dashboard_data' %}"
+       data-days="{{ scope.days|default:14 }}"
+       data-empresa="{{ scope.empresa_id|default:'' }}"></div>
+
+  <div class="row">
+    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Empresas</p>
+          <h5 class="font-weight-bolder mb-0">{{ cards.empresas|default:0 }}</h5>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Empleados</p>
+          <h5 class="font-weight-bolder mb-0">{{ cards.empleados|default:0 }}</h5>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Presentes (hoy)</p>
+          <h5 class="font-weight-bolder mb-0">{{ cards.presentes_hoy|default:0 }}</h5>
+          <span class="text-xs text-secondary">Incompletas: {{ cards.incompletas_hoy|default:0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Tardanzas (hoy)</p>
+          <h5 class="font-weight-bolder mb-0">{{ cards.tardanzas_hoy|default:0 }}</h5>
+          <span class="text-xs text-secondary">Fuera geocerca: {{ cards.geocerca_fuera|default:0 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-8 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Asistencia (serie)</h6>
+          <p class="text-sm text-secondary mb-0">Presentes vs Tardanzas ({{ scope.days }} días)</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-asistencia" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">KPIs ({{ charts.periodo|default:'' }})</h6>
+          <p class="text-sm text-secondary mb-0">Semáforo global</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-kpi" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Horas trabajadas</h6>
+          <p class="text-sm text-secondary mb-0">Horas vs horas extra ({{ scope.days }} días)</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-horas" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Comparativa por empresa (hoy)</h6>
+          <p class="text-sm text-secondary mb-0">Presentismo y alertas rápidas</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleados</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Presentes</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">% Pres.</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tardanzas</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Pendientes</th>
+                </tr>
+              </thead>
+              <tbody id="tt-empresas-resumen"></tbody>
+            </table>
+          </div>
+
+          <hr>
+          <div>
+            <h6 class="text-sm mb-2">Alertas de empresa</h6>
+            <div id="tt-alert-empresas" class="d-flex flex-column gap-2"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Solicitudes de ausencia pendientes</h6>
+          <p class="text-sm text-secondary mb-0">Aprobar / revisar</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desde</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hasta</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-abs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Top tardanzas (últimos 7 días)</h6>
+          <p class="text-sm text-secondary mb-0">Prioriza acciones correctivas</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-tardy"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Jornadas incompletas (hoy)</h6>
+          <p class="text-sm text-secondary mb-0">Faltan marcaciones</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Entrada</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Salida</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-inc"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">KPIs críticos (rojo)</h6>
+          <p class="text-sm text-secondary mb-0">Impacto directo en desempeño</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">KPI</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">% Cumpl.</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-kpi"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ charts|json_script:"tt-dash-charts" }}
+  {{ alerts|json_script:"tt-dash-alerts" }}
+  {{ empresas_rows|json_script:"tt-dash-empresas" }}
+
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+  <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+  <script src="{% static 'assets/js/talenttrack/dashboard_superadmin.js' %}"></script>
+{% endblock extra_js %}

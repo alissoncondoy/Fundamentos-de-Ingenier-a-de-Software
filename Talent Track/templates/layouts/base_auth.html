@@ -1,0 +1,14 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  {% include "includes/head.html" %}
+</head>
+
+<body class="tt-auth-bg">
+  {% block content %}{% endblock content %}
+
+  <!-- Core JS (Soft UI uses Bootstrap) -->
+  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+</body>
+</html>

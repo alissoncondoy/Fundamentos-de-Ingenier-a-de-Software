@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12 col-lg-8">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6>Confirmar eliminación</h6>
+        </div>
+        <div class="card-body">
+          <p class="text-sm">¿Seguro que deseas eliminar: <strong>{{ object }}</strong>?</p>
+          <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger mb-0" type="submit">Sí, eliminar</button>
+            <a class="btn btn-outline-secondary mb-0" href="javascript:history.back()">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
