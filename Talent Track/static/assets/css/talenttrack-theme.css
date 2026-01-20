@@ -1,0 +1,381 @@
+/*
+  TalentTrack theme overrides (brand palette based on the provided logo).
+  Loaded AFTER soft-ui-dashboard.css so it can override variables safely.
+*/
+
+:root {
+  /* Brand */
+  --tt-primary: #B83038;           /* rojo principal */
+  --tt-primary-rgb: 184, 48, 56;
+  --tt-dark: #111827;             /* gris muy oscuro */
+  --tt-muted: #6B7280;
+  --tt-bg: #F7F8FA;
+}
+
+/* Bootstrap / Soft UI variables */
+:root {
+  --bs-primary: var(--tt-primary);
+  --bs-primary-rgb: var(--tt-primary-rgb);
+  --bs-link-color: var(--tt-primary);
+  --bs-link-hover-color: #8F242B;
+}
+
+/* Buttons */
+.btn-primary,
+.bg-gradient-primary {
+  background-image: linear-gradient(310deg, #8F242B 0%, var(--tt-primary) 100%) !important;
+  border: none !important;
+}
+
+.btn-outline-primary {
+  color: var(--tt-primary) !important;
+  border-color: rgba(var(--tt-primary-rgb), .55) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: rgba(var(--tt-primary-rgb), .10) !important;
+}
+
+/* Sidebar active item */
+.sidenav .nav-link.active,
+.sidenav .nav-link.active .icon {
+  color: #fff !important;
+}
+
+.sidenav .nav-link.active {
+  background-image: linear-gradient(310deg, #8F242B 0%, var(--tt-primary) 100%) !important;
+}
+
+/* Cards / background */
+body {
+  background: var(--tt-bg);
+}
+
+/* Small brand helpers */
+.tt-brand {
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.tt-badge {
+  background: rgba(var(--tt-primary-rgb), .12);
+  color: var(--tt-primary);
+  border: 1px solid rgba(var(--tt-primary-rgb), .25);
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  font-size: .75rem;
+}
+
+/* Login */
+.tt-auth-bg {
+  background: radial-gradient(1200px circle at 10% 10%, rgba(var(--tt-primary-rgb), .22), transparent 55%),
+              radial-gradient(1000px circle at 90% 20%, rgba(17, 24, 39, .18), transparent 50%),
+              linear-gradient(180deg, #0B0F1A 0%, #111827 55%, #0B0F1A 100%);
+}
+
+/* --- UI polish: collapse caret + topbar toggler --- */
+.tt-collapse-caret{
+  font-size: .75rem;
+  opacity: .7;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.nav-link[aria-expanded="true"] .tt-collapse-caret{
+  transform: rotate(180deg);
+  opacity: .9;
+}
+
+.tt-topbar-toggler{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(31, 41, 55, 0.06);
+}
+.tt-topbar-toggler:hover{ background: rgba(31, 41, 55, 0.10); }
+.tt-topbar-toggler .sidenav-toggler-inner{ width: 18px; }
+.tt-topbar-toggler .sidenav-toggler-line{ background: #2b2f3a; }
+
+/* --- Absences inbox --- */
+.tt-abs-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+}
+.tt-abs-tab{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.4rem .75rem;
+  border-radius:999px;
+  background: rgba(17, 24, 39, 0.05);
+  color:#334155;
+  font-size:.85rem;
+  border:1px solid rgba(17, 24, 39, 0.08);
+}
+.tt-abs-tab:hover{ background: rgba(17, 24, 39, 0.08); color:#111827; }
+.tt-abs-tab.active{
+  background: rgba(var(--tt-primary-rgb), .10);
+  border-color: rgba(var(--tt-primary-rgb), .25);
+  color: var(--tt-primary);
+  font-weight:700;
+}
+.tt-abs-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 28px;
+  height: 22px;
+  padding:0 .5rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
+  color:#334155;
+  font-size:.75rem;
+}
+.tt-abs-tab.active .tt-abs-count{
+  background: rgba(var(--tt-primary-rgb), .16);
+  color: var(--tt-primary);
+}
+
+.tt-abs-card{ border: 1px solid rgba(17,24,39,.08); }
+.tt-abs-card:hover{ box-shadow: 0 12px 30px rgba(17,24,39,.08); transform: translateY(-1px); transition: .15s ease; }
+
+.tt-avatar{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 800;
+  color:#fff;
+  background-image: linear-gradient(310deg, #8F242B 0%, var(--tt-primary) 100%);
+}
+
+.tt-abs-meta{
+  display:grid;
+  grid-template-columns: 1fr 120px;
+  gap: 1rem;
+}
+.tt-abs-meta-wide{ grid-column: 1 / -1; }
+.tt-abs-meta-item{ min-width: 0; }
+.tt-abs-ellipsis{
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow:hidden;
+}
+.tt-abs-pre{
+  white-space: pre-wrap;
+  background: rgba(17, 24, 39, 0.04);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px;
+  padding: .75rem;
+}
+
+/* --- Attendance inbox (similar to absences) --- */
+.tt-att-card{ border: 1px solid rgba(17,24,39,.08); }
+.tt-att-card:hover{
+  box-shadow: 0 12px 30px rgba(17,24,39,.08);
+  transform: translateY(-1px);
+  transition: .15s ease;
+}
+
+/* ------------------------------------------------------------------
+   TT DataTables (Simple-DataTables) - make tables feel like a UI list
+   ------------------------------------------------------------------ */
+
+/* container spacing */
+.dataTable-top,
+.dataTable-bottom{
+  padding: .75rem 1rem;
+}
+
+/* search + per page */
+.dataTable-search input{
+  border: 1px solid rgba(17,24,39,.12);
+  border-radius: .75rem;
+  padding: .55rem .8rem;
+  font-size: .875rem;
+  background: #fff;
+}
+
+.dataTable-dropdown select{
+  border: 1px solid rgba(17,24,39,.12);
+  border-radius: .75rem;
+  padding: .45rem .75rem;
+  font-size: .875rem;
+  background: #fff;
+}
+
+/* table look */
+.dataTable-table{
+  border-collapse: separate;
+  border-spacing: 0 .55rem; /* row "cards" */
+}
+
+.dataTable-table thead th{
+  border-bottom: 0 !important;
+}
+
+.dataTable-table tbody tr{
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(17,24,39,.05);
+}
+
+.dataTable-table tbody td{
+  border-top: 1px solid rgba(17,24,39,.06) !important;
+  border-bottom: 1px solid rgba(17,24,39,.06) !important;
+  vertical-align: middle;
+}
+
+.dataTable-table tbody td:first-child{
+  border-left: 1px solid rgba(17,24,39,.06) !important;
+  border-top-left-radius: .75rem;
+  border-bottom-left-radius: .75rem;
+}
+.dataTable-table tbody td:last-child{
+  border-right: 1px solid rgba(17,24,39,.06) !important;
+  border-top-right-radius: .75rem;
+  border-bottom-right-radius: .75rem;
+}
+
+.dataTable-pagination a{
+  border-radius: .6rem !important;
+}
+
+/* compact actions column */
+.tt-actions-col{
+  width: 1%;
+  white-space: nowrap;
+}
+
+.tt-actions-btn{
+  border: 1px solid rgba(17,24,39,.12);
+  border-radius: .75rem;
+  padding: .35rem .55rem;
+}
+
+.tt-att-meta{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.tt-att-meta-wide{ grid-column: 1 / -1; }
+.tt-att-meta-item{ min-width: 0; }
+.tt-att-kv{
+  background: rgba(17, 24, 39, 0.04);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px;
+  padding: .6rem .75rem;
+}
+.tt-att-ellipsis{
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+
+/* --- Sidebar: minimal + clean (TalentTrack) --- */
+.sidenav .navbar-nav ul,
+.sidenav .navbar-nav .nav { list-style: none; }
+
+.navbar-vertical .navbar-nav .nav-link.tt-nav-section{
+  background: transparent !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  color: rgba(58, 65, 111, 0.85);
+}
+.navbar-vertical .navbar-nav .nav-link.tt-nav-section:hover{
+  color: #111827;
+}
+.navbar-vertical .navbar-nav .nav-link.tt-nav-section.tt-open{
+  color: #111827;
+}
+
+/* Remove the default dot markers on nested items */
+.navbar-vertical .navbar-nav .nav-item .collapse .nav .nav-item .nav-link:before,
+.navbar-vertical .navbar-nav .nav-item .collapsing .nav .nav-item .nav-link:before{
+  display: none !important;
+}
+
+/* Slightly tighter nesting */
+.navbar-vertical .navbar-nav .nav-item .collapse .nav .nav-item .nav-link,
+.navbar-vertical .navbar-nav .nav-item .collapsing .nav .nav-item .nav-link{
+  margin-left: 1rem;
+}
+
+/* Active child only (subtle brand tint) */
+.navbar-vertical .navbar-nav .nav-item .collapse .nav .nav-item .nav-link.active,
+.navbar-vertical .navbar-nav .nav-item .collapsing .nav .nav-item .nav-link.active{
+  background: rgba(var(--tt-primary-rgb), .10) !important;
+  border-radius: 12px;
+  color: #111827 !important;
+}
+
+/* --- Filters: keep buttons readable --- */
+.tt-filter-actions{ flex-wrap: wrap; gap: .5rem; }
+
+/* --- Employee cards (instead of flat tables) --- */
+.tt-emp-card{ border: 1px solid rgba(17,24,39,.08); }
+.tt-emp-card:hover{ box-shadow: 0 12px 30px rgba(17,24,39,.08); transform: translateY(-1px); transition: .15s ease; }
+
+.tt-emp-meta{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.tt-emp-meta-item{ min-width:0; }
+
+/* chips (small tags) */
+.tt-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  background: rgba(17, 24, 39, 0.06);
+  color:#334155;
+  border:1px solid rgba(17, 24, 39, 0.10);
+}
+.tt-chip-warn{
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.25);
+  color:#92400e;
+}
+.tt-chip-danger{
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.22);
+  color:#991b1b;
+}
+
+/* --- Attendance employee summary --- */
+.tt-emp-summary{ border: 1px solid rgba(17,24,39,.08); }
+.tt-timeline{ display:flex; flex-direction:column; gap: .9rem; }
+.tt-timeline-item{ position:relative; padding-left: 1.25rem; }
+.tt-timeline-dot{
+  position:absolute;
+  left:0;
+  top:.35rem;
+  width: .65rem;
+  height: .65rem;
+  border-radius: 999px;
+  background-image: linear-gradient(310deg, #8F242B 0%, var(--tt-primary) 100%);
+  box-shadow: 0 0 0 4px rgba(var(--tt-primary-rgb), .10);
+}
+.tt-timeline-content{ min-width:0; }
+
+.tt-jornada{
+  border:1px solid rgba(17,24,39,.08);
+  border-radius: 16px;
+  padding: .85rem;
+  background: #fff;
+}
+.tt-filter-actions .btn{
+  white-space: nowrap;
+  min-width: 110px;
+}
