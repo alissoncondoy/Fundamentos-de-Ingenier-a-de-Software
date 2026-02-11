@@ -1,0 +1,46 @@
+{% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+
+<head>
+  {% include 'includes/head.html' %}
+  {% block extrahead %}{% endblock extrahead %}
+  {% block extrastyle %}{% endblock extrastyle %}
+</head>
+
+<body class="g-sidenav-show bg-gray-100 {% block body %}{% endblock body %}">
+
+  {% block sidebar %}
+    {% if request.user.is_authenticated %}
+      {% include "includes/sidebar.html" %}
+    {% endif %}
+  {% endblock sidebar %}
+
+  <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
+    {% block header %}
+      {% include 'includes/navigation.html' %}
+    {% endblock header %}
+    {% block content %}{% endblock content %}
+  </main>
+
+  {# Plugin visual de Soft UI deshabilitado para mantener el look & feel de TalentTrack #}
+
+  {% include 'includes/scripts.html' %}
+  {% block extra_js %}{% endblock extra_js %}
+
+  <script src="{% static 'assets/js/talenttrack/weekdays_toggle.js' %}"></script>
+  <script src="{% static "assets/js/dark-theme.js" %}"></script>
+  <script>
+    if ('{{ request.user.profile.dark_mode }}' === 'True') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initialDarkMode();
+      });
+    }
+  </script>
+  
+
+</body>
+</html>

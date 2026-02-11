@@ -1,0 +1,122 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'assets/css/talenttrack/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12 col-xl-10 mx-auto">
+      <div class="tt-profile-card card shadow-sm">
+        <div class="tt-profile-cover">
+          <div class="tt-profile-cover__overlay"></div>
+        </div>
+
+        <div class="card-body pt-0">
+          <div class="tt-profile-header">
+            <div class="tt-profile-avatar">
+              {% if empleado.foto_url %}
+                <img src="{{ empleado.foto_url }}?v={% now 'U' %}" alt="Foto" class="tt-profile-avatar__img">
+              {% else %}
+                <div class="tt-profile-avatar__placeholder">
+                  {{ empleado.nombre|default:""|slice:":1"|upper }}{{ empleado.apellido|default:""|slice:":1"|upper }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="tt-profile-title">
+              <h4 class="mb-1">{{ empleado.nombre }} {{ empleado.apellido }}</h4>
+              <div class="text-muted small">
+                {{ empleado.email|default:"" }}
+                {% if empleado.puesto %} · {{ empleado.puesto.nombre }}{% endif %}
+                {% if empleado.unidad %} · {{ empleado.unidad.nombre }}{% endif %}
+              </div>
+            </div>
+
+            <div class="tt-profile-actions">
+              <a class="btn btn-sm btn-primary" href="{% url 'tt_profile_edit' %}">
+                <i class="fas fa-pen me-1"></i> Editar perfil
+              </a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'tt_profile_password' %}">
+                <i class="fas fa-key me-1"></i> Cambiar contraseña
+              </a>
+            </div>
+          </div>
+
+          {% if messages %}
+            <div class="mt-3">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-2">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="row mt-4 g-3">
+            <div class="col-12 col-md-6">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="tt-pill-icon me-2"><i class="fas fa-id-badge"></i></div>
+                    <h6 class="mb-0">Datos</h6>
+                  </div>
+                  <div class="tt-profile-kv">
+                    <div class="tt-profile-k">Documento:</div>
+                    <div class="tt-profile-v">{% firstof empleado.identificacion "—" %}</div>
+
+                    <div class="tt-profile-k">Teléfono:</div>
+                    <div class="tt-profile-v">{% firstof empleado.telefono "—" %}</div>
+
+                    <div class="tt-profile-k">Dirección:</div>
+                    <div class="tt-profile-v">{% firstof empleado.direccion "—" %}</div>
+                  </div>
+                  <div class="text-muted small mt-3">
+                    * Desde aquí solo puedes actualizar tu <strong>foto</strong> y tu <strong>dirección</strong>.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="card h-100 border-0 bg-light">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="tt-pill-icon me-2"><i class="fas fa-building"></i></div>
+                    <h6 class="mb-0">Empresa</h6>
+                  </div>
+                  <div class="tt-profile-kv">
+                    <div class="tt-profile-k">Empresa:</div>
+                    <div class="tt-profile-v">{% firstof empleado.empresa.nombre "—" %}</div>
+
+                    <div class="tt-profile-k">Turno:</div>
+                    <div class="tt-profile-v">{% if empleado.turno %}{{ empleado.turno.nombre }}{% else %}—{% endif %}</div>
+
+                    <div class="tt-profile-k">Estado:</div>
+                    <div class="tt-profile-v">
+                      {% if empleado.activo %}
+                        <span class="badge bg-success">Activo</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'tt_asistencia_hoy' %}">
+                      <i class="fas fa-clock me-1"></i> Marcar asistencia
+                    </a>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'tt_dashboard' %}">
+                      <i class="fas fa-chart-line me-1"></i> Ver dashboard
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

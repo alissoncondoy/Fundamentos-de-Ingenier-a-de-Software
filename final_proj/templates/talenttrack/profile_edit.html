@@ -1,0 +1,96 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'assets/css/talenttrack/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12 col-xl-8 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white border-0 pb-0">
+          <h5 class="mb-1">Editar mi perfil</h5>
+          <p class="text-muted mb-0">Actualiza tu foto y tu dirección. Otros datos los gestiona RRHH.</p>
+        </div>
+
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data" class="tt-form">
+            {% csrf_token %}
+            {{ form.foto_url }}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <div class="tt-profile-avatar tt-profile-avatar--edit mx-auto">
+                  {% if empleado.foto_url %}
+                    <img id="ttAvatarPreview" src="{{ empleado.foto_url }}?v={% now 'U' %}" alt="Foto" class="tt-profile-avatar__img">
+                  {% else %}
+                    <div id="ttAvatarPreview" class="tt-profile-avatar__placeholder">
+                      {{ empleado.nombre|default:""|slice:":1"|upper }}{{ empleado.apellido|default:""|slice:":1"|upper }}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="mt-3">
+                  <label class="form-label">Foto</label>
+                  {{ form.foto_archivo }}
+                  {% if form.foto_archivo.errors %}<div class="text-danger small">{{ form.foto_archivo.errors }}</div>{% endif %}
+                  <div class="form-text">PNG/JPG. Se actualizará en todo el sistema.</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-8">
+                <div class="mb-3">
+                  <label class="form-label">Dirección</label>
+                  {{ form.direccion }}
+                  {% if form.direccion.errors %}<div class="text-danger small">{{ form.direccion.errors }}</div>{% endif %}
+                </div>
+
+                <div class="tt-divider"></div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-save me-1"></i> Guardar cambios
+                  </button>
+                  <a class="btn btn-outline-secondary" href="{% url 'tt_profile' %}">Cancelar</a>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const input = document.getElementById('id_foto_archivo');
+  if(!input) return;
+  input.addEventListener('change', function(){
+    const file = this.files && this.files[0];
+    if(!file) return;
+    const url = URL.createObjectURL(file);
+    const preview = document.getElementById('ttAvatarPreview');
+    if(!preview) return;
+    if(preview.tagName.toLowerCase() === 'img'){
+      preview.src = url;
+    } else {
+      // placeholder div -> swap to img for preview
+      const img = document.createElement('img');
+      img.id = 'ttAvatarPreview';
+      img.className = 'tt-profile-avatar__img';
+      img.alt = 'Foto';
+      img.src = url;
+      preview.replaceWith(img);
+    }
+  });
+})();
+</script>
+{% endblock %}

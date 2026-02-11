@@ -1,0 +1,19 @@
+{#
+  Widget para Turnos: días de la semana como toggles.
+  Estructura intencional: <input> + <label> (hermanos) para que funcione con CSS `input:checked + label`.
+#}
+<div{% include "django/forms/widgets/attrs.html" %}>
+  {% for group, options, index in widget.optgroups %}
+    {% for option in options %}
+      <input
+        type="checkbox"
+        name="{{ widget.name }}"
+        value="{{ option.value }}"
+        id="{{ option.attrs.id }}"
+        {% if option.selected %}checked{% endif %}
+        {% if option.attrs.disabled %}disabled{% endif %}
+      />
+      <label for="{{ option.attrs.id }}">{{ option.label }}</label>
+    {% endfor %}
+  {% endfor %}
+</div>

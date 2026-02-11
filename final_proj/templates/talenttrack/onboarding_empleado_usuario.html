@@ -1,0 +1,188 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="mb-0">{{ title|default:"Alta de empleado + usuario" }}</h4>
+          {% if subtitle %}<p class="text-sm text-secondary mb-0">{{ subtitle }}</p>{% endif %}
+        </div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'tt_empleado_list' %}">Volver</a>
+        </div>
+      </div>
+
+      <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div data-tt-dependent-selects
+             data-unidades-url="{% url 'tt_ajax_unidades' %}"
+             data-puestos-url="{% url 'tt_ajax_puestos' %}"
+             data-empleados-url="{% url 'tt_ajax_empleados' %}"
+             data-managers-url="{% url 'tt_ajax_managers' %}"
+                data-roles-url="{% url 'tt_ajax_roles' %}"
+                data-turnos-url="{% url 'tt_ajax_turnos' %}"></div>
+
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-12 col-lg-6 mb-4">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <h6 class="mb-0">Datos del empleado</h6>
+                <p class="text-sm text-secondary mb-0">Información personal y organizacional</p>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  {% if form.empresa.is_hidden %}
+                    {{ form.empresa }}
+                  {% else %}
+                    <div class="col-12 mb-3">
+                      <label class="form-label">Empresa *</label>
+                      {{ form.empresa }}
+                      {% if form.empresa.errors %}<div class="text-danger text-xs">{{ form.empresa.errors }}</div>{% endif %}
+                    </div>
+                  {% endif %}
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Nombres *</label>
+                    {{ form.nombres }}
+                    {% if form.nombres.errors %}<div class="text-danger text-xs">{{ form.nombres.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Apellidos *</label>
+                    {{ form.apellidos }}
+                    {% if form.apellidos.errors %}<div class="text-danger text-xs">{{ form.apellidos.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Documento</label>
+                    {{ form.documento }}
+                    {% if form.documento.errors %}<div class="text-danger text-xs">{{ form.documento.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Teléfono</label>
+                    {{ form.telefono }}
+                    {% if form.telefono.errors %}<div class="text-danger text-xs">{{ form.telefono.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Dirección</label>
+                    {{ form.direccion }}
+                    {% if form.direccion.errors %}<div class="text-danger text-xs">{{ form.direccion.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Fecha nacimiento</label>
+                    {{ form.fecha_nacimiento }}
+                    {% if form.fecha_nacimiento.errors %}<div class="text-danger text-xs">{{ form.fecha_nacimiento.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label class="form-label">Fecha ingreso</label>
+                    {{ form.fecha_ingreso }}
+                    {% if form.fecha_ingreso.errors %}<div class="text-danger text-xs">{{ form.fecha_ingreso.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Unidad</label>
+                    {{ form.unidad }}
+                    {% if form.unidad.errors %}<div class="text-danger text-xs">{{ form.unidad.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Puesto</label>
+                    {{ form.puesto }}
+                    {% if form.puesto.errors %}<div class="text-danger text-xs">{{ form.puesto.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Manager</label>
+                    {{ form.manager }}
+                    {% if form.manager.errors %}<div class="text-danger text-xs">{{ form.manager.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Estado</label>
+                    {{ form.estado_empleado }}
+                    {% if form.estado_empleado.errors %}<div class="text-danger text-xs">{{ form.estado_empleado.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Foto (archivo)</label>
+                    {{ form.foto_archivo }}
+                    {% if form.foto_archivo.errors %}<div class="text-danger text-xs">{{ form.foto_archivo.errors }}</div>{% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 mb-4">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <h6 class="mb-0">Acceso + rol</h6>
+                <p class="text-sm text-secondary mb-0">Credenciales y permisos (obligatorio)</p>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Email *</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="text-danger text-xs">{{ form.email.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Teléfono (usuario)</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="text-danger text-xs">{{ form.phone.errors }}</div>{% endif %}
+                    <div class="form-text">Si no ingresas teléfono del empleado, se usará este.</div>
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Contraseña *</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}<div class="text-danger text-xs">{{ form.password.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <div class="form-check">
+                      {{ form.mfa_habilitado }}
+                      <label class="form-check-label">Habilitar MFA</label>
+                    </div>
+                    {% if form.mfa_habilitado.errors %}<div class="text-danger text-xs">{{ form.mfa_habilitado.errors }}</div>{% endif %}
+                  </div>
+                  <div class="col-12 mb-3">
+                    <label class="form-label">Rol *</label>
+                    {{ form.rol }}
+                    {% if form.rol.errors %}<div class="text-danger text-xs">{{ form.rol.errors }}</div>{% endif %}
+                  </div>
+
+                  <div class="col-12 mt-3">
+                    <button type="submit" class="btn btn-primary w-100">Crear empleado + usuario</button>
+                  </div>
+
+                  <div class="col-12 mt-3">
+                    <div class="alert alert-info text-sm mb-0">
+                      <strong>Regla:</strong> el usuario siempre debe estar asociado a un empleado y a un rol (se crea todo en una sola transacción).
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll("input, select, textarea").forEach(el => {
+    if (!el.classList.contains("form-control") && el.type !== "checkbox") el.classList.add("form-control");
+    if (el.type === "checkbox") el.classList.add("form-check-input");
+  });
+</script>
+
+{% endblock content %}
+
+{% block extra_js %}
+  <script src="{% static 'assets/js/plugins/choices.min.js' %}"></script>
+  <script src="{% static 'assets/js/talenttrack/dependent_selects.js' %}"></script>
+{% endblock extra_js %}

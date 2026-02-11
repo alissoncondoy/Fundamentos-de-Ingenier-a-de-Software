@@ -1,0 +1,154 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% load tt_roles %}
+
+{% block title %}Perfil | {{ empleado.nombres }} {{ empleado.apellidos }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 tt-profile">
+  <div class="row">
+    <div class="col-12">
+      <div class="card tt-profile-cover">
+        <div class="tt-profile-gradient"></div>
+        <div class="card-body tt-profile-body">
+          <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              {% if empleado.foto_url %}
+                <img class="tt-avatar" src="{{ empleado.foto_url }}?v={{ empleado.actualizado_el|date:'U' }}" alt="Foto" />
+              {% else %}
+                <div class="tt-avatar tt-avatar-fallback">
+                  <span>{{ empleado.nombres|default:""|slice:":1"|upper }}{{ empleado.apellidos|default:""|slice:":1"|upper }}</span>
+                </div>
+              {% endif %}
+
+              <div>
+                <h5 class="mb-0">{{ empleado.nombres }} {{ empleado.apellidos }}</h5>
+                <div class="text-sm text-muted">
+                  {% if empleado.puesto %}{{ empleado.puesto.nombre }}{% else %}Empleado{% endif %}
+                  {% if empleado.empresa %}
+                    <span class="mx-2">•</span>{{ empleado.empresa.nombre }}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+              {% if request.user.is_superadmin or request.user|has_role:"ADMIN_RRHH" %}
+                <a href="{% url 'tt_empleado_update' empleado.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-pen me-1"></i>Editar
+                </a>
+              {% endif %}
+              {% if request.user.empleado_id == empleado.id %}
+                <a href="{% url 'tt_password_change' %}" class="btn btn-sm btn-outline-secondary">
+                  <i class="fas fa-key me-1"></i>Cambiar contraseña
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+          {# Django templates don't support parentheses in conditions; keep it explicit. #}
+          {% if not request.user.is_superadmin and not request.user|has_role:"ADMIN_RRHH" %}
+            <div class="alert alert-info mt-3 mb-0">
+              Tu perfil es de solo lectura. Si necesitas actualizar datos, contacta a RRHH/Administrador.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Información</h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Cédula</div>
+                <div class="tt-kv-value">{{ empleado.cedula|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Email</div>
+                <div class="tt-kv-value">{{ empleado.email|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Teléfono</div>
+                <div class="tt-kv-value">{{ empleado.telefono|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Unidad</div>
+                <div class="tt-kv-value">{{ empleado.unidad.nombre|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Turno</div>
+                <div class="tt-kv-value">{{ turno_actual.nombre|default:"—" }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="tt-kv">
+                <div class="tt-kv-label">Acceso</div>
+                <div class="tt-kv-value">
+                  {% if usuario_account %}
+                    <span class="badge bg-success">Con usuario</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Sin usuario</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4 mt-4 mt-lg-0">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Accesos</h6>
+        </div>
+        <div class="card-body">
+          <div class="tt-kv mb-3">
+            <div class="tt-kv-label">Usuario</div>
+            <div class="tt-kv-value">
+              {% if usuario_account %}{{ usuario_account.email }}{% else %}{{ empleado.email|default:"—" }}{% endif %}
+            </div>
+          </div>
+          <div class="tt-kv mb-3">
+            <div class="tt-kv-label">Rol</div>
+            <div class="tt-kv-value">
+              {% if usuario_roles %}{{ usuario_roles|join:", " }}{% else %}—{% endif %}
+            </div>
+          </div>
+
+          {% if request.user.empleado_id == empleado.id %}
+            <div class="d-grid gap-2">
+              <a class="btn btn-sm btn-primary" href="{% url 'tt_profile_edit' %}">Editar mi perfil</a>
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'tt_profile_password' %}">Cambiar contraseña</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if request.user.is_superadmin or request.user|has_role:"ADMIN_RRHH" %}
+        <div class="card mt-4">
+          <div class="card-body">
+            <div class="text-sm text-muted">Edición habilitada para RRHH/Administrador.</div>
+            <a class="btn btn-primary btn-sm mt-2" href="{% url 'tt_empleado_update' empleado.id %}">Editar datos</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

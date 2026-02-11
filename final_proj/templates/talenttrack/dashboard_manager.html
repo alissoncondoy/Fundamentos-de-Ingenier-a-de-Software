@@ -1,0 +1,254 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div id="tt-dash" data-endpoint="{% url 'tt_dashboard_data' %}" data-days="{{ scope.days|default:14 }}"></div>
+  <div class="row align-items-center mb-4">
+    <div class="col-12 col-md-8">
+      <h4 class="mb-1">Dashboard (Manager)</h4>
+      <p class="text-sm text-secondary mb-0">Resumen operativo de <strong>{{ scope.label }}</strong> · Hoy: {{ scope.today }}</p>
+    </div>
+    <div class="col-12 col-md-4 mt-3 mt-md-0 text-md-end">
+      <div class="btn-group" role="group" aria-label="Rango">
+        <a class="btn btn-sm {% if scope.days|default:14 == 7 %}btn-dark{% else %}btn-outline-dark{% endif %}" href="?days=7">7 días</a>
+        <a class="btn btn-sm {% if scope.days|default:14 == 14 %}btn-dark{% else %}btn-outline-dark{% endif %}" href="?days=14">14 días</a>
+        <a class="btn btn-sm {% if scope.days|default:14 == 30 %}btn-dark{% else %}btn-outline-dark{% endif %}" href="?days=30">30 días</a>
+      </div>
+      <button id="tt-refresh" class="btn btn-sm btn-primary ms-2">Refrescar</button>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="row">
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Mi equipo</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="team_size">{{ cards.team_size }}</span></h4>
+          <span class="text-xs text-secondary">personas</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Presentes hoy</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="presentes_hoy">{{ cards.presentes_hoy }}</span></h4>
+          <span class="text-xs text-secondary">con jornada registrada</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Tardanzas hoy</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="tardanzas_hoy">{{ cards.tardanzas_hoy }}</span></h4>
+          <span class="text-xs text-secondary">llegadas tarde</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Jornadas incompletas</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="incompletas_hoy">{{ cards.incompletas_hoy }}</span></h4>
+          <span class="text-xs text-secondary">sin salida registrada</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Ausencias pendientes</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="pendientes_ausencia">{{ cards.pendientes_ausencia }}</span></h4>
+          <span class="text-xs text-secondary">por revisar</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">KPIs en rojo</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="kpi_rojo">{{ cards.kpi_rojo }}</span></h4>
+          <span class="text-xs text-secondary">periodo {{ charts.periodo }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Fuera de geocerca</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="geocerca_fuera">{{ cards.geocerca_fuera }}</span></h4>
+          <span class="text-xs text-secondary">eventos hoy</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm mb-0">Horas extra hoy</p>
+          <h4 class="font-weight-bolder mb-0"><span data-tt-card="horas_extra_hoy">{{ cards.horas_extra_hoy }}</span></h4>
+          <span class="text-xs text-secondary">(h)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row">
+    <div class="col-12 col-lg-8 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Asistencia últimos {{ scope.days|default:14 }} días</h6>
+          <p class="text-sm text-secondary mb-0">Presentes vs. tardanzas</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-asistencia" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-4 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Semáforo KPI</h6>
+          <p class="text-sm text-secondary mb-0">Periodo {{ charts.periodo }}</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-kpi" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Horas trabajadas vs. horas extra</h6>
+          <p class="text-sm text-secondary mb-0">Acumulado por día</p>
+        </div>
+        <div class="card-body">
+          <canvas id="tt-chart-horas" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  <div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0">Pendientes de ausencia</h6>
+            <p class="text-sm text-secondary mb-0">Solicitudes por aprobar / revisar</p>
+          </div>
+          <a class="btn btn-sm btn-outline-dark" href="{% url 'tt_ausencia_list' %}">Ver todo</a>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Desde</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Hasta</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-abs"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="mb-0">Top tardanzas (7 días)</h6>
+            <p class="text-sm text-secondary mb-0">Mayor cantidad de minutos tarde</p>
+          </div>
+          <a class="btn btn-sm btn-outline-dark" href="{% url 'tt_asistencia_list' %}">Ver registros</a>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Min</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-tardy"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Jornadas incompletas (hoy)</h6>
+          <p class="text-sm text-secondary mb-0">Entradas registradas sin salida</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Entrada</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Salida</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-inc"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">KPIs críticos (rojo)</h6>
+          <p class="text-sm text-secondary mb-0">Impacto directo en desempeño</p>
+        </div>
+        <div class="card-body pt-0">
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">KPI</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">% Cumpl.</th>
+                </tr>
+              </thead>
+              <tbody id="tt-alert-kpi"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ charts|json_script:"tt-dash-charts" }}
+  {{ alerts|json_script:"tt-dash-alerts" }}
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+  <script src="{% static 'assets/js/plugins/chartjs.min.js' %}"></script>
+  <script src="{% static 'assets/js/talenttrack/dashboard_manager.js' %}"></script>
+{% endblock extra_js %}

@@ -1,0 +1,23 @@
+{% load static %}
+
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 " id="sidenav-main">
+  <div class="sidenav-header">
+    <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+    <a class="navbar-brand m-0 d-flex align-items-center" href="{% url 'tt_dashboard' %}" aria-label="TalentTrack">
+      {# Logo principal (incluye texto), se muestra en el sidebar superior izquierdo #}
+      <img src="{% static 'assets/img/brand/logo.svg' %}" alt="TalentTrack"
+           class="navbar-brand-img tt-brand-logo"
+           style="width:150px;height:34px;object-fit:contain;border-radius:0;">
+    </a>
+  </div>
+  <hr class="horizontal dark mt-0">
+  <div class="collapse navbar-collapse  w-auto h-auto" id="sidenav-collapse-main">
+    {% include 'includes/menu-list.html' %}
+  </div>
+  <div class="sidenav-footer mx-3 mt-3 pt-2">
+    <div class="d-flex align-items-center justify-content-between">
+      <span class="tt-badge">v1.0</span>
+      <span class="text-xs text-secondary">Panel</span>
+    </div>
+  </div>
+</aside>

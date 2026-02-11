@@ -1,0 +1,154 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12">
+
+      <div class="card mb-4">
+        <div class="card-header pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            {% if is_employee_only %}
+              <h6 class="mb-0">Mis KPIs</h6>
+              <p class="text-sm text-secondary mb-0">Indicadores calculados automáticamente desde tu asistencia</p>
+            {% else %}
+              <h6 class="mb-0">KPIs</h6>
+              <p class="text-sm text-secondary mb-0">Indicadores por empresa</p>
+            {% endif %}
+          </div>
+
+          {% if not is_employee_only %}
+            <div class="d-flex gap-2">
+              {% if can_export %}
+                <a class="btn btn-outline-primary btn-sm"
+                   href="{% url 'tt_export_kpis_csv' %}?{{ request.GET.urlencode }}">
+                  Export CSV
+                </a>
+              {% endif %}
+              {% if can_create %}
+                <a class="btn btn-primary btn-sm" href="{% url 'tt_kpi_create' %}">Nuevo</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="card-body pt-3">
+
+          <form method="get" class="row g-2 align-items-end mb-3">
+            {% if is_superadmin and not is_employee_only %}
+              <div class="col-12 col-md-4">
+                <label class="form-label text-sm mb-1">Empresa</label>
+                <select name="empresa" class="form-control">
+                  <option value="">Todas</option>
+                  {% for e in empresa_options %}
+                    <option value="{{ e.id }}" {% if empresa_filter == e.id|stringformat:"s" %}selected{% endif %}>{{ e }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+            <div class="col-6 col-md-3">
+              <label class="form-label text-sm mb-1">Desde</label>
+              <input type="date" name="desde" value="{{ desde }}" class="form-control">
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label text-sm mb-1">Hasta</label>
+              <input type="date" name="hasta" value="{{ hasta }}" class="form-control">
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary w-100" type="submit">Filtrar</button>
+              <a class="btn btn-sm btn-outline-secondary w-100" href="{% url 'tt_kpi_list' %}">Limpiar</a>
+            </div>
+          </form>
+
+          {% if is_employee_only %}
+            <div class="row">
+              {% for c in kpi_cards %}
+                <div class="col-12 col-md-6 col-xl-4 mb-3">
+                  <div class="card h-100">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="text-sm text-secondary mb-1">{{ c.title }}</div>
+                          <div class="h4 mb-1">{{ c.value }}</div>
+                          <div class="text-xs text-secondary">{{ c.sub }}</div>
+                        </div>
+                        <span class="badge bg-gradient-{{ c.color }}" style="min-width: 34px;">
+                          <i class="{{ c.icon }}"></i>
+                        </span>
+                      </div>
+
+                      {% if c.progress is not None %}
+                        <div class="progress mt-3" style="height: 6px;">
+                          <div class="progress-bar bg-gradient-{{ c.color }}" role="progressbar" style="width: {{ c.progress }}%;" aria-valuenow="{{ c.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="col-12">
+                  <div class="text-center text-secondary py-4">No hay datos para el periodo seleccionado.</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0" data-tt-datatable="1" data-tt-perpage="10">
+                <thead>
+                  <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Código</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nombre</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Origen</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Activo</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" data-tt-nosort>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for k in kpis %}
+                  <tr>
+                    <td class="text-sm">{{ k.empresa }}</td>
+                    <td class="text-sm font-weight-bold">{{ k.codigo }}</td>
+                    <td class="text-sm">{{ k.nombre }}</td>
+                    <td class="text-sm text-secondary">{{ k.origen_datos|default:"" }}</td>
+                    <td class="text-sm">
+                      {% if k.activo %}
+                        <span class="badge bg-gradient-success">Sí</span>
+                      {% else %}
+                        <span class="badge bg-gradient-secondary">No</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-sm tt-actions-col">
+                      {% if can_create %}
+                        <div class="dropdown">
+                          <button class="btn btn-sm btn-outline-secondary mb-0 tt-actions-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="ni ni-settings-gear-65"></i>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'tt_kpi_update' k.id %}">Editar</a></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'tt_kpi_delete' k.id %}">Eliminar</a></li>
+                          </ul>
+                        </div>
+                      {% else %}
+                        <span class="text-secondary">—</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center text-secondary py-4">No hay KPIs para los filtros seleccionados.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

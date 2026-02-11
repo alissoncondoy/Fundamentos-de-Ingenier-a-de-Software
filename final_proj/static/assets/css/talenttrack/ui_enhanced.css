@@ -1,0 +1,100 @@
+:root{
+  --tt-accent:#cb0c9f;
+  --tt-accent-soft:rgba(203,12,159,.08);
+  --tt-hours:#3b82f6; /* horas */
+  --tt-extra:#f59e0b; /* extra */
+  --tt-success:#22c55e;
+  --tt-warning:#fbbf24;
+  --tt-danger:#ef4444;
+}
+
+body{
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(203,12,159,.08), rgba(255,255,255,0)),
+    radial-gradient(900px 500px at -10% 20%, rgba(59,130,246,.06), rgba(255,255,255,0)),
+    #f8f9fa;
+}
+
+/* Dashboards */
+.tt-dashboard .card{
+  border:1px solid rgba(0,0,0,.04);
+  box-shadow:0 10px 30px rgba(0,0,0,.05);
+}
+.tt-dashboard .card .card-header{
+  background:linear-gradient(90deg, var(--tt-accent-soft), rgba(255,255,255,0));
+}
+.tt-dashboard h4, .tt-dashboard h5{
+  letter-spacing:-.01em;
+}
+
+/* Small visual separators */
+.tt-section-title{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.tt-section-title::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:var(--tt-accent);
+  opacity:.65;
+}
+
+/* Badges for horas vs extras */
+.tt-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.25rem .55rem;
+  border-radius:999px;
+  font-weight:600;
+  font-size:.75rem;
+  line-height:1;
+  border:1px solid rgba(0,0,0,.06);
+  background:#fff;
+}
+.tt-pill-hours{ color:#1d4ed8; border-color:rgba(59,130,246,.35); background:rgba(59,130,246,.08); }
+.tt-pill-extra{ color:#b45309; border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10); }
+
+/* Profile cover */
+.tt-profile-cover{
+  position:relative;
+  overflow:hidden;
+  border-radius:1rem;
+  padding:1.25rem;
+  background:linear-gradient(135deg, rgba(203,12,159,.18), rgba(59,130,246,.10));
+}
+.tt-profile-cover::after{
+  content:"";
+  position:absolute;
+  inset:-40px -80px auto auto;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background:rgba(255,255,255,.35);
+  filter:blur(0);
+}
+.tt-avatar{
+  width:84px;
+  height:84px;
+  border-radius:50%;
+  background:#fff;
+  border:4px solid rgba(255,255,255,.8);
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  object-fit:cover;
+}
+.tt-avatar-fallback{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:800;
+  color:#111827;
+}
+
+/* Slightly nicer form sections */
+.tt-form-note{
+  font-size:.85rem;
+  color:#6c757d;
+}

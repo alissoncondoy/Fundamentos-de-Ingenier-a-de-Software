@@ -1,0 +1,412 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12 col-lg-8">
+
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h5 class="mb-0">Asistencia</h5>
+          <p class="text-sm text-secondary mb-0">Registra tu entrada y salida diaria</p>
+        </div>
+
+        <div class="card-body pt-3">
+          <div class="card bg-gray-100 mb-3">
+            <div class="card-body">
+              <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                <div>
+                  <h6 class="mb-1">Registro de hoy</h6>
+                  <div class="text-sm text-secondary">{{ hoy|date:"l d \d\e F Y" }}</div>
+                </div>
+
+                <div class="text-end">
+                  <div class="h4 mb-0" id="ttTimer">00:00:00</div>
+                  <div class="text-xs text-secondary" id="ttTimerHint">
+                    {% if in_progress %}
+                      Tiempo transcurrido desde tu última entrada
+                    {% else %}
+                      Hora actual
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <hr class="horizontal dark my-3">
+
+              {% if can_select_empleado %}
+              <form method="get" class="mb-3">
+                <label class="form-label text-sm mb-1">Empleado</label>
+                <select name="empleado" class="form-control" onchange="this.form.submit()">
+                  <option value="">Selecciona...</option>
+                  {% for emp in empleado_options %}
+                    <option value="{{ emp.id }}" {% if empleado_selected_id == emp.id|stringformat:"s" %}selected{% endif %}>{{ emp.apellidos }} {{ emp.nombres }}</option>
+                  {% endfor %}
+                </select>
+                <noscript><button class="btn btn-sm btn-outline-secondary mt-2" type="submit">Aplicar</button></noscript>
+              </form>
+              {% endif %}
+
+              <button id="ttMarkBtn" type="button" class="btn {{ btn_class }} w-100 mb-3" {% if mark_done %}disabled{% endif %} data-tt-done="{{ mark_done|yesno:"1,0" }}">
+                <span id="ttBtnText">{{ next_label }}</span>
+              </button>
+
+              {% if mark_done and mark_reason %}
+              <div class="alert alert-secondary py-2 px-3 mt-2 mb-0">
+                <div class="text-sm mb-0">{{ mark_reason }}</div>
+              </div>
+              {% endif %}
+
+              <div class="d-flex flex-column gap-1 text-sm">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ni ni-square-pin text-secondary"></i>
+                  <span class="text-secondary">{{ geocerca.nombre|default:"Ubicación" }}</span>
+                  <span id="ttGpsBadge" class="badge bg-gradient-secondary ms-auto">GPS</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="ni ni-camera-compact text-secondary"></i>
+                  <span class="text-secondary">Foto capturada automáticamente</span>
+                  <span id="ttPhotoBadge" class="badge bg-gradient-secondary ms-auto">FOTO</span>
+                </div>
+
+                {% if requiere_gps or requiere_foto %}
+                  <div class="mt-2">
+                    <span class="badge bg-gradient-info">Requisitos del turno</span>
+                    <span class="text-xs text-secondary ms-2">
+                      {% if requiere_gps %}GPS{% endif %}
+                      {% if requiere_gps and requiere_foto %} + {% endif %}
+                      {% if requiere_foto %}FOTO{% endif %}
+                    </span>
+                  </div>
+                {% endif %}
+
+                <div id="ttMarkError" class="alert alert-danger py-2 px-3 mt-3" style="display:none;"></div>
+              </div>
+
+              <!-- Captura silenciosa -->
+              <video id="ttVideo" playsinline autoplay muted style="display:none;"></video>
+              <canvas id="ttCanvas" style="display:none;"></canvas>
+
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header pb-0">
+              <h6 class="mb-0">Historial de Asistencia</h6>
+              <p class="text-sm text-secondary mb-0">Revisa tus eventos y exporta si aplica</p>
+            </div>
+            <div class="card-body">
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'tt_asistencia_list' %}">Ver historial</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-12 col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h6 class="mb-0">Resumen del mes</h6>
+          <p class="text-sm text-secondary mb-0">Estadística del mes actual</p>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-sm">Puntualidad</span>
+            <span class="text-sm font-weight-bold">{{ resumen_puntualidad }}%</span>
+          </div>
+          <div class="progress mb-3" style="height: 6px;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{ resumen_puntualidad }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ resumen_puntualidad }}%;"></div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-sm">Días trabajados</span>
+            <span class="text-sm font-weight-bold">{{ resumen_dias }}</span>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-sm">Horas trabajadas</span>
+            <span class="text-sm font-weight-bold">
+              <span class="badge bg-gradient-success">{{ resumen_horas }}h</span>
+            </span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <span class="text-sm">Horas extra</span>
+            <span class="text-sm font-weight-bold">
+              <span class="badge bg-gradient-warning">{{ resumen_horas_extra }}h</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <div class="text-sm"><strong>Tip:</strong> Si estás en móvil, permite cámara y ubicación para validar tu marcación.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal confirmación -->
+<div class="modal fade" id="ttMarkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center py-4">
+        <div class="mb-3">
+          <span class="badge bg-gradient-success" style="font-size: 1rem;">✓</span>
+        </div>
+        <h6 class="mb-2" id="ttMarkModalTitle">¡Registro exitoso!</h6>
+        <div class="text-sm text-secondary mb-3" id="ttMarkModalTime"></div>
+
+        <div class="text-start mx-auto" style="max-width: 280px;">
+          <div class="d-flex justify-content-between text-sm mb-1">
+            <span>Tipo:</span>
+            <span id="ttMarkModalTipo" class="font-weight-bold"></span>
+          </div>
+          <div class="d-flex justify-content-between text-sm mb-1">
+            <span>GPS:</span>
+            <span id="ttMarkModalGps" class="font-weight-bold"></span>
+          </div>
+          <div class="d-flex justify-content-between text-sm">
+            <span>Geocerca:</span>
+            <span id="ttMarkModalGeo" class="font-weight-bold"></span>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-secondary btn-sm mt-4" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const REQUIERE_GPS = {{ requiere_gps|yesno:"true,false" }};
+  const MARK_DONE = {{ mark_done|yesno:"true,false" }};
+  const IN_PROGRESS = {{ in_progress|yesno:"true,false" }};
+  const REQUIERE_FOTO = {{ requiere_foto|yesno:"true,false" }};
+  const FIRST_IN_ISO = "{{ first_in_iso }}";
+  const SELECTED_EMPLEADO_ID = "{{ empleado_selected_id|default:'' }}";
+
+  const timerEl = document.getElementById('ttTimer');
+  const btn = document.getElementById('ttMarkBtn');
+  const btnText = document.getElementById('ttBtnText');
+  const errBox = document.getElementById('ttMarkError');
+  const gpsBadge = document.getElementById('ttGpsBadge');
+  const photoBadge = document.getElementById('ttPhotoBadge');
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtHMS(totalSeconds){
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = Math.floor(totalSeconds%60);
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  function startTimer(){
+    // Solo mostramos contador transcurrido cuando la jornada está "en progreso".
+    // Si ya está completada o no hay entrada activa, mostramos la hora actual.
+    const start = (IN_PROGRESS && FIRST_IN_ISO) ? new Date(FIRST_IN_ISO) : null;
+    setInterval(()=>{
+      if(start){
+        const now = new Date();
+        const diff = Math.max(0, Math.floor((now - start)/1000));
+        timerEl.textContent = fmtHMS(diff);
+      } else {
+        const now = new Date();
+        timerEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      }
+    }, 1000);
+  }
+
+  function showError(msg){
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError(){
+    errBox.textContent = '';
+    errBox.style.display = 'none';
+  }
+
+  async function getGPS(){
+    if(!navigator.geolocation) return {lat:null,lng:null, ok:false, reason:'No soporta GPS'};
+    return new Promise((resolve)=>{
+      navigator.geolocation.getCurrentPosition(
+        (pos)=> resolve({lat: pos.coords.latitude, lng: pos.coords.longitude, ok:true}),
+        (err)=> resolve({lat:null,lng:null, ok:false, reason: err.message || 'Sin permiso GPS'}),
+        {enableHighAccuracy:true, timeout:8000, maximumAge:0}
+      );
+    });
+  }
+
+  async function takePhoto(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      return {photo:null, ok:false, reason:'No soporta cámara'};
+    }
+    const video = document.getElementById('ttVideo');
+    const canvas = document.getElementById('ttCanvas');
+
+    let stream = null;
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio:false });
+      video.setAttribute('playsinline','true');
+      video.muted = true;
+      video.srcObject = stream;
+
+      // Esperar a que el video tenga metadata y esté listo para dibujar
+      await new Promise((resolve, reject)=>{
+        let done = false;
+        const t = setTimeout(()=>{
+          if(done) return;
+          done = true;
+          resolve();
+        }, 1500);
+        video.onloadedmetadata = () => {
+          if(done) return;
+          clearTimeout(t);
+          done = true;
+          resolve();
+        };
+      });
+
+      // Intentar reproducir (algunos navegadores lo requieren)
+      try{ await video.play(); }catch(e){}
+
+      // Esperar a que haya frame real (evita capturas negras)
+      const waitFrame = async ()=> new Promise(r=>requestAnimationFrame(()=>r()));
+      await waitFrame();
+      await waitFrame();
+
+      const w = video.videoWidth || 640;
+      const h = video.videoHeight || 480;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, w, h);
+
+      // Comprimir un poco para subir más rápido
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      return {photo:dataUrl, ok:true};
+    } catch(e){
+      return {photo:null, ok:false, reason: e.message || 'Sin permiso cámara'};
+    } finally {
+      if(stream){
+        stream.getTracks().forEach(t=>t.stop());
+      }
+      if(video) video.srcObject = null;
+    }
+  }
+
+  function getDeviceId(){
+    try{
+      const key = "tt_device_id";
+      let v = localStorage.getItem(key);
+      if(!v){
+        v = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ("id-"+Math.random().toString(16).slice(2));
+        localStorage.setItem(key, v);
+      }
+      return v;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function openModal(data){
+    const mTitle = document.getElementById('ttMarkModalTitle');
+    const mTime = document.getElementById('ttMarkModalTime');
+    const mTipo = document.getElementById('ttMarkModalTipo');
+    const mGps = document.getElementById('ttMarkModalGps');
+    const mGeo = document.getElementById('ttMarkModalGeo');
+
+    mTitle.textContent = data.message || '¡Registro exitoso!';
+    if(data.registrado_el){
+      const d = new Date(data.registrado_el);
+      mTime.textContent = d.toLocaleString();
+    } else {
+      mTime.textContent = '';
+    }
+    mTipo.textContent = (data.tipo || '').replace('_',' ');
+    mGps.textContent = (data.gps && data.gps.lat) ? `${data.gps.lat}, ${data.gps.lng}` : '—';
+    if(data.dentro_geocerca === true) mGeo.textContent = 'Dentro';
+    else if(data.dentro_geocerca === false) mGeo.textContent = 'Fuera';
+    else mGeo.textContent = '—';
+
+    const modalEl = document.getElementById('ttMarkModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  async function mark(){
+    if(MARK_DONE){
+      return;
+    }
+    clearError();
+    btn.disabled = true;
+    btnText.textContent = 'Registrando...';
+
+    gpsBadge.className = 'badge bg-gradient-secondary ms-auto';
+    photoBadge.className = 'badge bg-gradient-secondary ms-auto';
+
+    const gps = await getGPS();
+    if(gps.ok) gpsBadge.className = 'badge bg-gradient-success ms-auto';
+    else gpsBadge.className = 'badge bg-gradient-warning ms-auto';
+
+    const pic = await takePhoto();
+    if(pic.ok) photoBadge.className = 'badge bg-gradient-success ms-auto';
+    else photoBadge.className = 'badge bg-gradient-warning ms-auto';
+
+    if(REQUIERE_GPS && !gps.ok){
+      showError('Este turno requiere GPS. Habilita ubicación e intenta de nuevo.');
+      btn.disabled = false;
+      btnText.textContent = '{{ next_label }}';
+      return;
+    }
+    if(REQUIERE_FOTO && !pic.ok){
+      showError('Este turno requiere foto. Habilita cámara e intenta de nuevo.');
+      btn.disabled = false;
+      btnText.textContent = '{{ next_label }}';
+      return;
+    }
+
+    try{
+      const resp = await fetch('{% url "tt_asistencia_marcar" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          lat: gps.lat,
+          lng: gps.lng,
+          photo: pic.photo,
+          device_id: getDeviceId(),
+          empleado_id: SELECTED_EMPLEADO_ID || null,
+        })
+      });
+      const data = await resp.json();
+      if(!resp.ok || !data.ok){
+        showError(data.error || 'No se pudo registrar.');
+        btn.disabled = false;
+        btnText.textContent = '{{ next_label }}';
+        return;
+      }
+
+      openModal(data);
+      // recargar para recalcular siguiente acción
+      setTimeout(()=>window.location.reload(), 1200);
+
+    } catch(e){
+      showError(e.message || 'Error inesperado.');
+      btn.disabled = false;
+      btnText.textContent = '{{ next_label }}';
+    }
+  }
+
+  btn.addEventListener('click', mark);
+  startTimer();
+})();
+</script>
+
+{% endblock %}

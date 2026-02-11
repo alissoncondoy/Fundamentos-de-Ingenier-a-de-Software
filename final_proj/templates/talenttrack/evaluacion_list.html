@@ -1,0 +1,158 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <h6 class="mb-0">Evaluaciones</h6>
+            <p class="text-sm text-secondary mb-0">Evaluación de desempeño por periodo</p>
+          </div>
+          <div class="d-flex gap-2">
+            {% if can_create %}
+              <a href="{% url "tt_evaluacion_create" %}" class="btn btn-sm bg-gradient-primary mb-0">Nueva evaluación</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-body pt-3">
+
+          <form method="get" class="row g-2 align-items-end mb-3">
+            {% if is_superadmin %}
+              <div class="col-12 col-md-4">
+                <label class="form-label text-sm mb-1">Empresa</label>
+                <select name="empresa" class="form-control">
+                  <option value="">Todas</option>
+                  {% for e in empresa_options %}
+                    <option value="{{ e.id }}" {% if empresa_filter == e.id|stringformat:"s" %}selected{% endif %}>{{ e }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+
+            <div class="col-12 col-md-4">
+              <label class="form-label text-sm mb-1">Buscar (empleado / periodo / tipo)</label>
+              <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control" placeholder="Ej: 2025-Q4, desempeño, Juan...">
+            </div>
+
+            <div class="col-6 col-md-2">
+              <label class="form-label text-sm mb-1">Desde</label>
+              <input type="date" name="desde" value="{{ desde }}" class="form-control">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label text-sm mb-1">Hasta</label>
+              <input type="date" name="hasta" value="{{ hasta }}" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+              <button class="btn btn-sm btn-outline-secondary w-100" type="submit">Filtrar</button>
+              <a class="btn btn-sm btn-outline-secondary w-100" href="{% url 'tt_evaluacion_list' %}">Limpiar</a>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="table align-items-center mb-0" data-tt-datatable="1" data-tt-perpage="10">
+              <thead>
+                <tr>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empresa</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Empleado</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Periodo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tipo</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Puntaje</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Evaluador</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Fecha</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Comentarios</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" data-tt-nosort>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ev in evaluaciones %}
+                <tr>
+                  <td class="text-sm">{{ ev.empresa }}</td>
+                  <td class="text-sm font-weight-bold">{{ ev.empleado }}</td>
+                  <td class="text-sm">{{ ev.periodo|default:"" }}</td>
+                  <td class="text-sm">{{ ev.tipo|default:"" }}</td>
+                  <td class="text-sm">{{ ev.puntaje_total|default:"-" }}</td>
+                  <td class="text-sm text-secondary">{{ ev.evaluador|default:"" }}</td>
+                  <td class="text-sm text-secondary">{% if ev.fecha %}{{ ev.fecha|date:"Y-m-d H:i" }}{% endif %}</td>
+                  <td class="text-sm text-secondary" style="max-width: 320px;">
+                    {{ ev.comentarios|default:""|truncatechars:80 }}
+                  </td>
+                  <td class="text-sm tt-actions-col">
+                    <button type="button" class="btn btn-sm btn-outline-secondary mb-0" data-bs-toggle="modal" data-bs-target="#evalModal{{ ev.id }}">
+                      Ver
+                    </button>
+                    {% if can_create %}
+                      <a class="btn btn-sm btn-outline-primary mb-0" href="{% url "tt_evaluacion_update" ev.id %}">Editar</a>
+                      <a class="btn btn-sm btn-outline-danger mb-0" href="{% url "tt_evaluacion_delete" ev.id %}">Eliminar</a>
+                    {% endif %}
+                  </td>
+                </tr>
+
+                <!-- Modal detalle -->
+                <div class="modal fade" id="evalModal{{ ev.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Detalle de evaluación</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <div class="text-xs text-secondary">Empleado</div>
+                            <div class="fw-semibold">{{ ev.empleado }}</div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="text-xs text-secondary">Empresa</div>
+                            <div class="fw-semibold">{{ ev.empresa }}</div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="text-xs text-secondary">Periodo</div>
+                            <div class="fw-semibold">{{ ev.periodo|default:"—" }}</div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="text-xs text-secondary">Tipo</div>
+                            <div class="fw-semibold">{{ ev.tipo|default:"—" }}</div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="text-xs text-secondary">Puntaje</div>
+                            <div class="fw-semibold">{{ ev.puntaje_total|default:"—" }}</div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="text-xs text-secondary">Evaluador</div>
+                            <div class="fw-semibold">{{ ev.evaluador|default:"—" }}</div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="text-xs text-secondary">Fecha</div>
+                            <div class="fw-semibold">{% if ev.fecha %}{{ ev.fecha|date:"Y-m-d H:i" }}{% else %}—{% endif %}</div>
+                          </div>
+                          <div class="col-12">
+                            <div class="text-xs text-secondary">Comentarios</div>
+                            <div class="tt-abs-pre">{{ ev.comentarios|default:"—" }}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center text-secondary py-4">Sin resultados</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
